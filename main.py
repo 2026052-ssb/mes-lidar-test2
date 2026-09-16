@@ -38,15 +38,28 @@ print("Triangles:", np.asarray(mesh.triangles).shape)
 # 2. LiDAR 설정
 # =========================
 
+vertices = np.asarray(mesh.vertices)
+
+bbox_min = vertices.min(axis=0)
+bbox_max = vertices.max(axis=0)
+bbox_center = (bbox_min + bbox_max) / 2
+
+print("Min:", bbox_min)
+print("Max:", bbox_max)
+print("Center:", bbox_center)
+
+
 # LiDAR 위치
 LIDAR_POSITION = np.array([
-    0.0,   # X
-    0.0,   # Y
-    5.0    # Z
+    bbox_max[0] + 10000,   # X
+    bbox_center[1],        # Y
+    bbox_center[2],        # Z
 ], dtype=np.float32)
 
+print("LiDAR position:", LIDAR_POSITION)
+
 # LiDAR 수평 FOV
-H_FOV = 360.0
+H_FOV = 120.0
 
 # LiDAR 수직 FOV
 V_FOV_UP = 15.0
@@ -59,7 +72,7 @@ CHANNELS = 16
 H_RESOLUTION = 0.2
 
 # 최대 측정 거리
-MAX_RANGE = 100.0
+MAX_RANGE = 100000.0
 
 
 # =========================
@@ -125,7 +138,7 @@ az, el = np.meshgrid(
 
 directions = np.stack(
     [
-        np.cos(el) * np.cos(az),
+        -np.cos(el) * np.cos(az),
         np.cos(el) * np.sin(az),
         np.sin(el),
     ],
@@ -203,7 +216,7 @@ pcd.points = o3d.utility.Vector3dVector(points)
 # =========================
 
 lidar_marker = o3d.geometry.TriangleMesh.create_sphere(
-    radius=0.2
+    radius=100
 )
 
 lidar_marker.translate(LIDAR_POSITION)
