@@ -13,6 +13,12 @@ channels: 16
 horizontal_resolution_deg: 0.2
 max_range: 100000.0
 
+# Point cloud output path, relative to ROOT_PATH in main.py
+output:
+  enabled: true
+  directory: datasets/mes-lidar-test1/pcd
+  extension: .pcd
+
 # Visualization
 marker_radius: 100.0
 ray_visualization:

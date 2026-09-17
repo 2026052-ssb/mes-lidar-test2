@@ -65,9 +65,25 @@ def create_ray_lineset(
     return lineset
 
 
+def save_point_cloud(point_cloud: o3d.geometry.PointCloud, output_path: Path) -> None:
+    """Save a point cloud as a PCD file, creating its parent directory if needed."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not o3d.io.write_point_cloud(str(output_path), point_cloud, compressed=True):
+        raise OSError(f"Failed to save point cloud: {output_path}")
+
+    print(f"PCD saved: {output_path}")
+
+
 lidar_config = load_lidar_config(CONFIG_PATH)
 
-target_path = str(TARGET_PATH / "2540_281_000.fbx")
+target_path = TARGET_PATH / "2540_281_000.fbx"
+output_config = lidar_config["output"]
+pcd_output_path = (
+    ROOT_PATH
+    / output_config["directory"]
+    / f"{target_path.stem}{output_config['extension']}"
+)
 
 print("FBX:", target_path)
 
@@ -75,7 +91,7 @@ print("FBX:", target_path)
 # =========================
 # 1. CAD → Triangle Mesh
 # =========================
-mesh = o3d.io.read_triangle_mesh(target_path)
+mesh = o3d.io.read_triangle_mesh(str(target_path))
 
 mesh.compute_vertex_normals()
 
@@ -277,8 +293,11 @@ pcd = o3d.geometry.PointCloud()
 
 pcd.points = o3d.utility.Vector3dVector(points)
 
+if output_config["enabled"]:
+    save_point_cloud(pcd, pcd_output_path)
+
 # =========================
-# 11. LiDAR 위치 표시
+# 12. LiDAR 위치 표시
 # =========================
 
 lidar_marker = o3d.geometry.TriangleMesh.create_sphere(
@@ -293,7 +312,7 @@ lidar_marker.paint_uniform_color(
 
 
 # =========================
-# 12. Visualization
+# 13. Visualization
 # =========================
 
 geometries = [
