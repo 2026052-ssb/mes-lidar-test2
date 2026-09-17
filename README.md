@@ -29,6 +29,16 @@ LiDAR 위치는 CAD 메시의 bounding box를 기준으로 계산하며, YAML의
 스캔한 포인트 클라우드는 기본적으로 CAD 파일명과 동일한 `.pcd` 파일로 저장됩니다.
 저장 경로와 활성화 여부는 `config/lidar.yaml`의 `output`에서 설정합니다. 경로는 `main.py`의 `ROOT_PATH`를 기준으로 하며, 대상 디렉터리가 없으면 자동 생성됩니다.
 
+### PCD 뷰어
+
+```bash
+# 설정된 출력 폴더에서 가장 최근 PCD 파일 열기
+python viewer.py
+
+# 특정 PCD 파일 열기
+python viewer.py /path/to/point-cloud.pcd
+```
+
 ### 참조
 
 https://github.com/jonathsch/lidar-synthesis
