@@ -316,7 +316,7 @@ lidar_marker.paint_uniform_color(
 # =========================
 
 geometries = [
-    # mesh,           # CAD
+    mesh,           # CAD
     pcd,            # PCD
     lidar_marker
 ]
