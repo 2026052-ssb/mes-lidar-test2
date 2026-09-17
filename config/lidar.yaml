@@ -15,3 +15,8 @@ max_range: 100000.0
 
 # Visualization
 marker_radius: 100.0
+ray_visualization:
+  enabled: true
+  # Evenly sample hit rays to keep the viewport responsive.
+  max_rays: 2000
+  color: [1.0, 0.8, 0.0]

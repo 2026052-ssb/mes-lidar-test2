@@ -31,6 +31,40 @@ def load_lidar_config(config_path: Path) -> dict:
     return config
 
 
+def create_ray_lineset(
+    ray_origins: np.ndarray,
+    hit_points: np.ndarray,
+    max_rays: int,
+    color: list[float],
+) -> o3d.geometry.LineSet:
+    """Create a LineSet between LiDAR origins and ray hit points."""
+    ray_count = min(len(hit_points), max_rays)
+    sample_indices = np.linspace(
+        0,
+        len(hit_points) - 1,
+        ray_count,
+        dtype=int,
+    )
+
+    sampled_origins = ray_origins[sample_indices]
+    sampled_points = hit_points[sample_indices]
+    lineset = o3d.geometry.LineSet()
+    lineset.points = o3d.utility.Vector3dVector(
+        np.vstack([sampled_origins, sampled_points])
+    )
+    lineset.lines = o3d.utility.Vector2iVector(
+        np.column_stack([
+            np.arange(ray_count),
+            np.arange(ray_count) + ray_count,
+        ])
+    )
+    lineset.colors = o3d.utility.Vector3dVector(
+        np.tile(color, (ray_count, 1))
+    )
+
+    return lineset
+
+
 lidar_config = load_lidar_config(CONFIG_PATH)
 
 target_path = str(TARGET_PATH / "2540_281_000.fbx")
@@ -220,7 +254,23 @@ print("Valid points:", len(points))
 
 
 # =========================
-# 9. Point Cloud 생성
+# 9. LiDAR Ray 시각화
+# =========================
+
+ray_visualization_config = lidar_config["ray_visualization"]
+ray_lines = None
+if ray_visualization_config["enabled"] and len(points) > 0:
+    ray_lines = create_ray_lineset(
+        origins[valid],
+        points,
+        ray_visualization_config["max_rays"],
+        ray_visualization_config["color"],
+    )
+    print("Visualized rays:", len(ray_lines.lines))
+
+
+# =========================
+# 10. Point Cloud 생성
 # =========================
 
 pcd = o3d.geometry.PointCloud()
@@ -228,7 +278,7 @@ pcd = o3d.geometry.PointCloud()
 pcd.points = o3d.utility.Vector3dVector(points)
 
 # =========================
-# 10. LiDAR 위치 표시
+# 11. LiDAR 위치 표시
 # =========================
 
 lidar_marker = o3d.geometry.TriangleMesh.create_sphere(
@@ -243,13 +293,15 @@ lidar_marker.paint_uniform_color(
 
 
 # =========================
-# 11. Visualization
+# 12. Visualization
 # =========================
 
-o3d.visualization.draw(
-    [
-        mesh,
-        pcd,
-        lidar_marker,
-    ]
-)
+geometries = [
+    # mesh,           # CAD
+    pcd,            # PCD
+    lidar_marker
+]
+if ray_lines is not None:
+    geometries.append(ray_lines)
+
+o3d.visualization.draw_geometries(geometries)
