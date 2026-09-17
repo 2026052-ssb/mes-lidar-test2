@@ -2,6 +2,7 @@ from pathlib import Path
 import platform
 import numpy as np
 import open3d as o3d
+import yaml
 
 
 # =========================
@@ -16,6 +17,21 @@ else:
     raise Exception(f"Unsupported platform: {platform.system()}")
 
 TARGET_PATH = ROOT_PATH / "datasets/mes-lidar-test1/cad"
+CONFIG_PATH = Path(__file__).parent / "config" / "lidar.yaml"
+
+
+def load_lidar_config(config_path: Path) -> dict:
+    """Load LiDAR parameters from a YAML configuration file."""
+    with config_path.open(encoding="utf-8") as config_file:
+        config = yaml.safe_load(config_file)
+
+    if not isinstance(config, dict):
+        raise ValueError(f"Invalid LiDAR config: {config_path}")
+
+    return config
+
+
+lidar_config = load_lidar_config(CONFIG_PATH)
 
 target_path = str(TARGET_PATH / "2540_281_000.fbx")
 
@@ -51,28 +67,28 @@ print("Center:", bbox_center)
 
 # LiDAR 위치
 LIDAR_POSITION = np.array([
-    bbox_max[0] + 10000,   # X
-    bbox_center[1],        # Y
-    bbox_center[2],        # Z
+    bbox_max[0] + lidar_config["position"]["x_offset_from_max"],
+    bbox_center[1] + lidar_config["position"]["y_offset_from_center"],
+    bbox_center[2] + lidar_config["position"]["z_offset_from_center"],
 ], dtype=np.float32)
 
 print("LiDAR position:", LIDAR_POSITION)
 
 # LiDAR 수평 FOV
-H_FOV = 120.0
+H_FOV = lidar_config["horizontal_fov_deg"]
 
 # LiDAR 수직 FOV
-V_FOV_UP = 15.0
-V_FOV_DOWN = -15.0
+V_FOV_UP = lidar_config["vertical_fov_deg"]["up"]
+V_FOV_DOWN = lidar_config["vertical_fov_deg"]["down"]
 
 # LiDAR channel 수
-CHANNELS = 16
+CHANNELS = lidar_config["channels"]
 
 # 수평 resolution
-H_RESOLUTION = 0.2
+H_RESOLUTION = lidar_config["horizontal_resolution_deg"]
 
 # 최대 측정 거리
-MAX_RANGE = 100000.0
+MAX_RANGE = lidar_config["max_range"]
 
 
 # =========================
@@ -216,7 +232,7 @@ pcd.points = o3d.utility.Vector3dVector(points)
 # =========================
 
 lidar_marker = o3d.geometry.TriangleMesh.create_sphere(
-    radius=100
+    radius=lidar_config["marker_radius"]
 )
 
 lidar_marker.translate(LIDAR_POSITION)

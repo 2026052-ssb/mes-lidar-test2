@@ -1,0 +1,17 @@
+# Bounding box-based LiDAR placement (model coordinate unit)
+position:
+  x_offset_from_max: 10000.0
+  y_offset_from_center: 0.0
+  z_offset_from_center: 0.0
+
+# LiDAR scan parameters
+horizontal_fov_deg: 120.0
+vertical_fov_deg:
+  up: 15.0
+  down: -15.0
+channels: 16
+horizontal_resolution_deg: 0.2
+max_range: 100000.0
+
+# Visualization
+marker_radius: 100.0
