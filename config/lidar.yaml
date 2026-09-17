@@ -1,17 +1,33 @@
+# Livox HAP (T1/TX) configuration.
+#
+# Range and placement values use the CAD model's coordinate unit.  This project
+# uses millimetres, so the HAP's 150 m detection range is 150000.0 below.
+# HAP uses a non-repetitive scan pattern.  The raycaster currently produces a
+# regular grid, so `channels` and `horizontal_resolution_deg` represent the
+# HAP's equivalent ROI point-cloud density, rather than its physical beam path.
+sensor:
+  model: Livox HAP
+  frame_rate_hz: 10.0
+  point_rate_points_per_sec: 452000
+  equivalent_lines: 144
+  roi_horizontal_fov_deg: 40.0
+  roi_vertical_fov_deg: 12.0
+
 # Bounding box-based LiDAR placement (model coordinate unit)
 position:
   x_offset_from_max: 10000.0
   y_offset_from_center: 0.0
   z_offset_from_center: 0.0
 
-# LiDAR scan parameters
+# HAP FOV: 120 deg (horizontal) x 25 deg (vertical).
+# HAP ROI angular resolution: 0.18 deg (horizontal) x 0.23 deg (vertical).
 horizontal_fov_deg: 120.0
 vertical_fov_deg:
-  up: 15.0
-  down: -15.0
-channels: 16
-horizontal_resolution_deg: 0.2
-max_range: 100000.0
+  up: 12.5
+  down: -12.5
+channels: 144
+horizontal_resolution_deg: 0.18
+max_range: 150000.0
 
 # Point cloud output path, relative to ROOT_PATH in main.py
 output:
